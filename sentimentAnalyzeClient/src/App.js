@@ -66,7 +66,6 @@ class App extends React.Component {
                 this.setState({ sentimentOutput: output });
             }
         } catch (err) {
-            console.log(err);
             this.setErrorState('Something went wrong :(');
         }
     }

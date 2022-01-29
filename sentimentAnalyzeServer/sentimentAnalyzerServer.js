@@ -42,12 +42,12 @@ function getNLUInstance() {
 
 
 //The default endpoint for the webserver
-app.get("/", (req,res)=>{
+app.get('/', (req,res)=>{
     res.render('index.html');
   });
 
 //The endpoint for the webserver ending with /url/emotion
-app.get("/url/emotion", async (req,res) => {
+app.get('/url/emotion', async (req,res) => {
     // //Extract the url passed from the client through the request object
     let urlToAnalyze = req.query.url;
     const analyzeParams = {
@@ -64,15 +64,16 @@ app.get("/url/emotion", async (req,res) => {
         const naturalLanguageUnderstanding = getNLUInstance();
         const analysisResults = await naturalLanguageUnderstanding.analyze(analyzeParams)
         //Retrieve the emotion and return it as a formatted string
+        res.status(200);
         return res.send(analysisResults.result.keywords[0].emotion,null,2);
     } catch (err) {
         res.status(500);
-        return res.send("Could not do desired operation "+err);
+        return res.send('Could not do desired operation: ' + err);
     };
 });
 
 //The endpoint for the webserver ending with /url/sentiment
-app.get("/url/sentiment", async (req,res) => {
+app.get('/url/sentiment', async (req,res) => {
     const urlToAnalyze = req.query.url;
     const analyzeParams = {
         url: urlToAnalyze, 
@@ -86,15 +87,16 @@ app.get("/url/sentiment", async (req,res) => {
     try {
         const naturalLanguageUnderstanding = getNLUInstance();
         const analysisResults = await naturalLanguageUnderstanding.analyze(analyzeParams);
+        res.status(200);
         res.send(analysisResults.result.keywords[0].sentiment);
     } catch (err) {
         res.status(500);
-        res.send('Could not do desired operation ' + err);
+        res.send('Could not do desired operation: ' + err);
     }
 });
 
 //The endpoint for the webserver ending with /text/emotion
-app.get("/text/emotion", async (req,res) => {
+app.get('/text/emotion', async (req,res) => {
     const textToAnalyze = req.query.text;
     const analyzeParams = {
         text: textToAnalyze, 
@@ -108,14 +110,15 @@ app.get("/text/emotion", async (req,res) => {
     try {
         const naturalLanguageUnderstanding = getNLUInstance();
         const analysisResults = await naturalLanguageUnderstanding.analyze(analyzeParams);
+        res.status(200);
         res.send(analysisResults.result.keywords[0].emotion);
     } catch (err) {
         res.status(500);
-        res.send('Could not do desired operation ' + err);
+        res.send('Could not do desired operation: ' + err);
     }
 });
 
-app.get("/text/sentiment", async (req,res) => {
+app.get('/text/sentiment', async (req,res) => {
     const textToAnalyze = req.query.text;
     const analyzeParams = {
         text: textToAnalyze, 
@@ -129,10 +132,11 @@ app.get("/text/sentiment", async (req,res) => {
     try {
         const naturalLanguageUnderstanding = getNLUInstance();
         const analysisResults = await naturalLanguageUnderstanding.analyze(analyzeParams);
+        res.status(200);
         res.send(analysisResults.result.keywords[0].sentiment);
     } catch (err) {
         res.status(500);
-        res.send('Could not do desired operation ' + err);
+        res.send('Could not do desired operation: ' + err);
     }
 });
 

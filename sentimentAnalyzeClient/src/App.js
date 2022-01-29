@@ -14,7 +14,8 @@ class App extends React.Component {
         innercomp: <textarea rows="4" cols="50" id="textinput" />,
         mode: "text",
         sentimentOutput: [],
-        sentiment: true
+        sentiment: true, 
+        errorOutput: ''
     }
 
     /*
@@ -39,40 +40,65 @@ class App extends React.Component {
         });
     }
 
-    sendForSentimentAnalysis = () => {
+    sendForSentimentAnalysis = async () => {
+        this.setErrorState();
         this.setState({ sentiment: true });
-        let url = ".";
-        let mode = this.state.mode
-        url = url + "/" + mode + "/sentiment?" + mode + "=" + document.getElementById("textinput").value;
+        const mode = this.state.mode;
+        const inputValue = document.getElementById("textinput").value;
+        const url = `./${mode}/sentiment?${mode}=${inputValue}`;
 
-        fetch(url).then((response) => {
-            response.json().then((data) => {
-                this.setState({ sentimentOutput: data.label });
-                let output = data.label;
+        try {
+            const response = await fetch(url);
+            if (response.status === 500) {
+                const data = await response.text();
+                this.setErrorState(data);
+                return; 
+            } else {
+                const {label} = await response.json();
+                this.setState({ sentimentOutput: label });
                 let color = "white"
-                switch (output) {
+                switch (label) {
                     case "positive": color = "green"; break;
                     case "negative": color = "red"; break;
-                    default: color = "yellow";
+                    default: color = "yellow"; break;
                 }
-                output = <div style={{ color: color, fontSize: 20 }}>{output}</div>
+                const output = <div style={{ color: color, fontSize: 20 }}>{label}</div>
                 this.setState({ sentimentOutput: output });
-            })
-        });
+            }
+        } catch (err) {
+            console.log(err);
+            this.setErrorState('Something went wrong :(');
+        }
     }
 
-    sendForEmotionAnalysis = () => {
-
+    sendForEmotionAnalysis = async () => {
+        this.setErrorState();
         this.setState({ sentiment: false });
-        let url = ".";
-        let mode = this.state.mode
-        url = url + "/" + mode + "/emotion?" + mode + "=" + document.getElementById("textinput").value;
-
-        fetch(url).then((response) => {
-            response.json().then((data) => {
+        const inputValue = document.getElementById("textinput").value;
+        const mode = this.state.mode;
+        const url = `./${mode}/emotion?${mode}=${inputValue}`;
+        try {
+            const response = await fetch(url)
+            if (response.status === 500) {
+                const data = await response.text();
+                this.setErrorState(data);
+                return; 
+            } else {
+                const data = await response.json();
                 this.setState({ sentimentOutput: <EmotionTable emotions={data} /> });
-            })
-        });
+            }
+        } catch (err) {
+            this.setErrorState('Something went wrong :(');
+        }
+    }
+
+    setErrorState(errorMessage) {
+        const style = {
+            color: 'red', 
+            fontSize: '24px'
+        };
+        const output = errorMessage ? <div style={style}>{errorMessage}</div> : '';
+        this.setState({errorOutput: output});
     }
 
 
@@ -88,6 +114,7 @@ class App extends React.Component {
                 <button className="btn-primary" onClick={this.sendForEmotionAnalysis}>Analyze Emotion</button>
                 <br />
                 {this.state.sentimentOutput}
+                {this.state.errorOutput}
             </div>
         );
     }
